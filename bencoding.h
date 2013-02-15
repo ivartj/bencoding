@@ -16,6 +16,7 @@ typedef union bencode_val bencode_val;
 struct bencode_string {
 	int type;
 	char *val;
+	unsigned len;
 };
 
 struct bencode_integer {

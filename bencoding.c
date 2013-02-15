@@ -108,6 +108,7 @@ bencode_string *parsestring(const char *input, unsigned len, unsigned *rlen)
 	out = calloc(1, sizeof(bencode_string));
 	out->type = BENCODE_STRING;
 	out->val = val;
+	out->len = slen;
 	*rlen = n;
 
 	return out;
