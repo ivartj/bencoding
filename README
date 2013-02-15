@@ -1,0 +1,3 @@
+Programming exercise in making a personal bencoding library.
+
+Unless you have properly reviewed the code, do not use this library for security-critical applications. This library is probably vulnerable to integer overflows.

@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: ivartjbencoding
+Description: bencoding parser and writer library.
+Version: @VERSION@
+Libs: -L${libdir}/ivartj -lbencoding
+Cflags: -I${includedir}
