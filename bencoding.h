@@ -47,7 +47,7 @@ union bencode_val {
 };
 
 bencode_val *bencode_parse(const char *input, unsigned len);
-char *bencode_tostring(bencode_val *val, unsigned *rlen);
+char *bencode_val_string(bencode_val *val, unsigned *rlen);
 
 void bencode_free_recursive(bencode_val *val);
 void bencode_list_add(bencode_list *list, bencode_val *val);
