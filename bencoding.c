@@ -1,12 +1,15 @@
 #include "bencoding.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 static bencode_string *parsestring(const char *input, unsigned len, unsigned *rlen);
 static bencode_integer *parseinteger(const char *input, unsigned len, unsigned *rlen);
 static bencode_list *parselist(const char *input, unsigned len, unsigned *rlen);
 static bencode_dict *parsedict(const char *input, unsigned len, unsigned *rlen);
 static bencode_val *parseval(const char *input, unsigned len, unsigned *rlen);
+static int writeval(bencode_val *val, char *str);
+static unsigned valstrlen(bencode_val *val);
 
 bencode_val *bencode_parse(const char *input, unsigned len)
 {
@@ -240,4 +243,107 @@ void bencode_dict_add(bencode_dict *dict, bencode_string *key, bencode_val *val)
 	dict->vals = realloc(dict->vals, sizeof(bencode_val *) * dict->nvals);
 	dict->keys[dict->nvals - 1] = key;
 	dict->vals[dict->nvals - 1] = val;
+}
+
+char *bencode_val_string(bencode_val *val, unsigned *rlen)
+{
+	unsigned len;
+	char *out;
+
+	len = valstrlen(val);
+	out = malloc(len + 1);
+	out[len] = '\0';
+
+	writeval(val, out);
+
+	if(rlen != NULL)
+		*rlen = len;
+
+	return out;
+}
+
+int writeval(bencode_val *val, char *str)
+{
+	int n;
+	int i;
+
+	n = 0;
+
+	switch(val->type) {
+	case BENCODE_STRING:
+		n += sprintf(str, "%u:", val->string.len);
+		memcpy(str + n, val->string.val, val->string.len);
+		return n + val->string.len;
+	case BENCODE_INTEGER:
+		n += sprintf(str, "i%de", val->integer.val);
+		return n;
+	case BENCODE_LIST:
+		str[0] = 'l';
+		n++;
+		for(i = 0; i < val->list.nvals; i++)
+			n += writeval(val->list.vals[i], str + n);
+		str[n] = 'e';
+		n++;
+		return n;
+	case BENCODE_DICT:
+		str[0] = 'd';
+		n++;
+		for(i = 0; i < val->dict.nvals; i++) {
+			n += writeval((bencode_val *)(val->dict.keys[i]), str + n);
+			n += writeval(val->dict.vals[i], str + n);
+		}
+		str[n] = 'e';
+		n++;
+		return n;
+	}
+}
+
+unsigned intstrlen(int i)
+{
+	unsigned len;
+
+	len = 0;
+
+	if(i < 0) {
+		len++;
+		i *= -1;
+	}
+
+	while(i) {
+		len++;
+		i /= 10;
+	}
+
+	return len;
+}
+
+unsigned valstrlen(bencode_val *val)
+{
+	unsigned sum;
+	int i;
+
+	sum = 0;
+
+	switch(val->type) {
+	case BENCODE_STRING:
+		return intstrlen(val->string.len) + 1 + val->string.len;
+	case BENCODE_INTEGER:
+		return 1 + intstrlen(val->integer.val) + 1;
+	case BENCODE_LIST:
+		sum = 1;	
+		for(i = 0; i < val->list.nvals; i++)
+			sum += valstrlen(val->list.vals[i]);
+		sum += 1;
+		return sum;
+	case BENCODE_DICT:
+		sum = 1;	
+		for(i = 0; i < val->dict.nvals; i++) {
+			sum += valstrlen((bencode_val *)(val->dict.keys[i]));
+			sum += valstrlen(val->dict.vals[i]);
+		}
+		sum += 1;
+		return sum;
+	}
+
+	return 0;
 }

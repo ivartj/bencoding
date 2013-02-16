@@ -1,15 +1,10 @@
-TESTS = integer string list dict
+TESTS = integer string list dict valstring
 
-check_PROGRAMS = integer string list dict
+check_PROGRAMS = $(TESTS)
 
-integer_SOURCES = ../bencoding.h integer.c
-integer_LDADD = ../libbencoding.a
+integer_SOURCES = integer.c
+string_SOURCES = string.c
+list_SOURCES = list.c
+dict_SOURCES = dict.c
 
-string_SOURCES = ../bencoding.h string.c
-string_LDADD = ../libbencoding.a
-
-list_SOURCES = ../bencoding.h list.c
-list_LDADD = ../libbencoding.a
-
-dict_SOURCES = ../bencoding.h dict.c
-dict_LDADD = ../libbencoding.a
+valstring_SOURCES = valstring.c
