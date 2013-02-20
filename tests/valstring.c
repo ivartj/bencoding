@@ -18,8 +18,6 @@ int main(int argc, char *argv[])
 
 	written = bencode_val_string(val, &len);
 
-	puts(written);
-	printf("%u\n", len);
 	assert(strlen(bencoding) == len);
 	assert(strcmp(written, bencoding) == 0);
 

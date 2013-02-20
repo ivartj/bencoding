@@ -1,4 +1,4 @@
-TESTS = integer string list dict valstring metafile
+TESTS = integer string list dict valstring metafile json
 
 check_PROGRAMS = $(TESTS)
 
@@ -11,3 +11,6 @@ valstring_SOURCES = valstring.c
 
 metafile_SOURCES = metafile.c
 metafile_LDADD = ../libivartjbencoding.la
+
+json_SOURCES = json.c
+json_LDADD = ../libivartjbencoding.la

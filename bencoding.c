@@ -2,22 +2,23 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <assert.h>
 
-static bencode_string *parsestring(const char *input, unsigned len, unsigned *rlen);
-static bencode_integer *parseinteger(const char *input, unsigned len, unsigned *rlen);
-static bencode_list *parselist(const char *input, unsigned len, unsigned *rlen);
-static bencode_dict *parsedict(const char *input, unsigned len, unsigned *rlen);
-static bencode_val *parseval(const char *input, unsigned len, unsigned *rlen);
-static int writeval(bencode_val *val, char *str);
-static unsigned valstrlen(bencode_val *val);
+static bencode_string *parsestring(const char *input, size_t len, size_t *rlen);
+static bencode_integer *parseinteger(const char *input, size_t len, size_t *rlen);
+static bencode_list *parselist(const char *input, size_t len, size_t *rlen);
+static bencode_dict *parsedict(const char *input, size_t len, size_t *rlen);
+static bencode_val *parseval(const char *input, size_t len, size_t *rlen);
+static size_t writeval(bencode_val *val, char *str);
+static size_t valstrlen(bencode_val *val);
 
-bencode_val *bencode_parse(const char *input, unsigned len)
+bencode_val *bencode_parse(const char *input, size_t len)
 {
-	int rlen;
+	size_t rlen;
 	return parseval(input, len, &rlen);
 }
 
-bencode_val *parseval(const char *input, unsigned len, unsigned *rlen)
+bencode_val *parseval(const char *input, size_t len, size_t *rlen)
 {
 	if(len < 2)
 		return 0;
@@ -33,7 +34,7 @@ bencode_val *parseval(const char *input, unsigned len, unsigned *rlen)
 	}
 }
 
-bencode_integer *parseinteger(const char *input, unsigned len, unsigned *rlen)
+bencode_integer *parseinteger(const char *input, size_t len, size_t *rlen)
 {
 	int n;
 	int negative;
@@ -77,7 +78,7 @@ bencode_integer *parseinteger(const char *input, unsigned len, unsigned *rlen)
 	return out;
 }
 
-bencode_string *parsestring(const char *input, unsigned len, unsigned *rlen)
+bencode_string *parsestring(const char *input, size_t len, size_t *rlen)
 {
 	char *val;
 	int slen;
@@ -105,7 +106,7 @@ bencode_string *parsestring(const char *input, unsigned len, unsigned *rlen)
 
 	val = malloc(slen + 1);
 	val[slen] = '\0';
-	strncpy(val, input + n, slen);
+	memcpy(val, input + n, slen);
 	n += slen;
 
 	out = calloc(1, sizeof(bencode_string));
@@ -117,10 +118,10 @@ bencode_string *parsestring(const char *input, unsigned len, unsigned *rlen)
 	return out;
 }
 
-bencode_list *parselist(const char *input, unsigned len, unsigned *rlen)
+bencode_list *parselist(const char *input, size_t len, size_t *rlen)
 {
-	int n;
-	int eln;
+	size_t n;
+	size_t eln;
 	bencode_val *el;
 	bencode_list *out;
 
@@ -191,10 +192,10 @@ void bencode_list_add(bencode_list *list, bencode_val *val)
 	list->vals[list->nvals - 1] = val;
 }
 
-bencode_dict *parsedict(const char *input, unsigned len, unsigned *rlen)
+bencode_dict *parsedict(const char *input, size_t len, size_t *rlen)
 {
-	int n;
-	int eln;
+	size_t n;
+	size_t eln;
 	bencode_string *key;
 	bencode_val *el;
 	bencode_dict *out;
@@ -215,7 +216,7 @@ bencode_dict *parsedict(const char *input, unsigned len, unsigned *rlen)
 			n++;
 			goto ret;
 		}
-		key = parsestring(input +n, len - n, &eln);
+		key = parsestring(input + n, len - n, &eln);
 		if(key == 0)
 			goto err;
 		n += eln;
@@ -245,9 +246,9 @@ void bencode_dict_add(bencode_dict *dict, bencode_string *key, bencode_val *val)
 	dict->vals[dict->nvals - 1] = val;
 }
 
-char *bencode_val_string(bencode_val *val, unsigned *rlen)
+char *bencode_val_string(bencode_val *val, size_t *rlen)
 {
-	unsigned len;
+	size_t len;
 	char *out;
 
 	len = valstrlen(val);
@@ -262,9 +263,9 @@ char *bencode_val_string(bencode_val *val, unsigned *rlen)
 	return out;
 }
 
-int writeval(bencode_val *val, char *str)
+size_t writeval(bencode_val *val, char *str)
 {
-	int n;
+	size_t n;
 	int i;
 
 	n = 0;
@@ -273,9 +274,14 @@ int writeval(bencode_val *val, char *str)
 	case BENCODE_STRING:
 		n += sprintf(str, "%u:", val->string.len);
 		memcpy(str + n, val->string.val, val->string.len);
-		return n + val->string.len;
+		n += val->string.len;
+		return n;
 	case BENCODE_INTEGER:
 		n += sprintf(str, "i%de", val->integer.val);
+		if(n != valstrlen(val)) {
+			printf("i%de", val->integer.val);
+			printf("\nn = %d\nvalstrlen = %d\n", n, valstrlen(val));
+		}
 		return n;
 	case BENCODE_LIST:
 		str[0] = 'l';
@@ -298,9 +304,9 @@ int writeval(bencode_val *val, char *str)
 	}
 }
 
-unsigned intstrlen(int i)
+size_t intstrlen(int i)
 {
-	unsigned len;
+	size_t len;
 
 	len = 0;
 
@@ -308,6 +314,9 @@ unsigned intstrlen(int i)
 		len++;
 		i *= -1;
 	}
+
+	if(i == 0)
+		len++;
 
 	while(i) {
 		len++;
@@ -317,9 +326,9 @@ unsigned intstrlen(int i)
 	return len;
 }
 
-unsigned valstrlen(bencode_val *val)
+size_t valstrlen(bencode_val *val)
 {
-	unsigned sum;
+	size_t sum;
 	int i;
 
 	sum = 0;

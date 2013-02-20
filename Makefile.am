@@ -5,7 +5,7 @@ ivartjincludedir = $(includedir)/ivartj
 ivartjinclude_HEADERS = bencoding.h
 
 lib_LTLIBRARIES = libivartjbencoding.la
-libivartjbencoding_la_SOURCES = bencoding.h bencoding.c
+libivartjbencoding_la_SOURCES = bencoding.h bencoding.c json.c
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = ivartjbencoding.pc 

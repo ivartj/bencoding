@@ -34,7 +34,12 @@ int main(int argc, char *argv[])
 	size_t stringlen;
 	bencode_val *benval;
 	unsigned char *benvalstring;
-	size_t benvalstringlen;
+	unsigned benvalstringlen;
+	unsigned char *iter;
+	size_t minlen;
+	int i, j; 
+	char *json;
+	size_t jsonlen;
 
 	file = fopen("minix.torrent", "r");
 	if(file == NULL) {
@@ -52,10 +57,16 @@ int main(int argc, char *argv[])
 
 	benvalstring = bencode_val_string(benval, &benvalstringlen);
 
-	printf("benvalstringlen\t= %zd.\n", benvalstringlen);
-	printf("stringlen\t= %zd.\n", stringlen);
+	if(benvalstring == NULL) {
+		fprintf(stderr, "Failed to parse benvalstring.\n");
+		exit(EXIT_FAILURE);
+	}
 
 	assert(memcmp(benvalstring, string, benvalstringlen) == 0);
+
+	free(benvalstring);
+	free(string);
+	bencode_free_recursive(benval);
 
 	exit(EXIT_SUCCESS);
 }
