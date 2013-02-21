@@ -47,6 +47,8 @@ size_t writestring(bencode_val *val, char *str, unsigned ind)
 	size_t n;
 	int i;
 
+	n = 0;
+
 	string = &(val->string);
 
 	str[0] = '\"';
@@ -74,7 +76,7 @@ size_t writechar(unsigned char c, char *str)
 		return 1;
 	}
 
-	n = sprintf("\\x%.2hhX", c);
+	n = sprintf(str, "\\x%.2hhX", c);
 
 	return n;
 }
