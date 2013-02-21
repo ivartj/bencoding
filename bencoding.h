@@ -56,5 +56,6 @@ void bencode_free_recursive(bencode_val *val);
 void bencode_list_add(bencode_list *list, bencode_val *val);
 void bencode_dict_add(bencode_dict *dict, bencode_string *key, bencode_val *val);
 
+bencode_val *bencode_dict_get(bencode_dict *dict, const char *key);
 
 #endif

@@ -237,6 +237,7 @@ ret:
 	return out;
 }
 
+/* Should insert sort in the future, according the bencoding spec */
 void bencode_dict_add(bencode_dict *dict, bencode_string *key, bencode_val *val)
 {
 	dict->nvals++;
@@ -355,4 +356,21 @@ size_t valstrlen(bencode_val *val)
 	}
 
 	return 0;
+}
+
+bencode_val *bencode_dict_get(bencode_dict *dict, const char *key)
+{
+	int i;
+
+	if(dict->type != BENCODE_DICT)
+		return NULL;
+
+	for(i = 0; i < dict->nvals; i++)
+		if(strcmp(dict->keys[i]->val, key) == 0)
+			break;
+
+	if(i == dict->nvals)
+		return NULL;
+
+	return dict->vals[i];
 }
