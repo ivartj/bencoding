@@ -169,8 +169,8 @@ void bencode_free_recursive(bencode_val *val)
 	case BENCODE_LIST:
 		for(i = 0; i < val->list.nvals; i++) {
 			bencode_free_recursive(val->list.vals[i]);	
-			free(val->list.vals);
 		}
+		free(val->list.vals);
 		free(val);
 		return;
 	case BENCODE_DICT:
