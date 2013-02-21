@@ -176,10 +176,10 @@ void bencode_free_recursive(bencode_val *val)
 	case BENCODE_DICT:
 		for(i = 0; i < val->dict.nvals; i++) {
 			bencode_free_recursive((bencode_val *)(val->dict.keys[i]));
-			free(val->dict.keys);
 			bencode_free_recursive((bencode_val *)(val->dict.vals[i]));
-			free(val->dict.vals);
 		}
+		free(val->dict.keys);
+		free(val->dict.vals);
 		free(val);
 		return;
 	}
@@ -279,10 +279,6 @@ size_t writeval(bencode_val *val, char *str)
 		return n;
 	case BENCODE_INTEGER:
 		n += sprintf(str, "i%de", val->integer.val);
-		if(n != valstrlen(val)) {
-			printf("i%de", val->integer.val);
-			printf("\nn = %d\nvalstrlen = %d\n", n, valstrlen(val));
-		}
 		return n;
 	case BENCODE_LIST:
 		str[0] = 'l';
