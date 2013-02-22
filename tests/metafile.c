@@ -34,12 +34,14 @@ int main(int argc, char *argv[])
 	size_t stringlen;
 	bencode_val *benval;
 	unsigned char *benvalstring;
-	unsigned benvalstringlen;
+	size_t benvalstringlen;
 	unsigned char *iter;
 	size_t minlen;
 	int i, j; 
 	char *json;
 	size_t jsonlen;
+	bencode_dict *info;
+	bencode_integer *private;
 
 	file = fopen("minix.torrent", "r");
 	if(file == NULL) {
@@ -66,6 +68,21 @@ int main(int argc, char *argv[])
 
 	free(benvalstring);
 	free(string);
+
+	info = (bencode_dict *)bencode_dict_get((bencode_dict *)benval, "info");
+	if(info == NULL || info->type != BENCODE_DICT) {
+		fprintf(stderr, "No info section found in bencode!\n");
+		exit(EXIT_FAILURE);
+	}
+
+	private = (bencode_integer *)bencode_dict_get(info, "private");
+	if(private == NULL || private->type != BENCODE_INTEGER) {
+		fprintf(stderr, "No private member of info section in bencode!\n");
+		exit(EXIT_FAILURE);
+	}
+
+	printf("private = %i\n", private->val);
+
 	bencode_free_recursive(benval);
 
 	exit(EXIT_SUCCESS);

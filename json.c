@@ -14,11 +14,11 @@ char *bencode_val_json(bencode_val *val, size_t *rlen)
 	size_t len;
 	char *str;
 
-	len = 20000;
+	len = 100000;
 	str = malloc(len + 1);
 	len = writeval(val, str, 0);
 	str[len + 1] = '\0';
-	//str = realloc(str, len + 1);
+	str = realloc(str, len + 1);
 
 	if(rlen != NULL)
 		*rlen = len;
@@ -54,8 +54,9 @@ size_t writestring(bencode_val *val, char *str, unsigned ind)
 	str[0] = '\"';
 	n++;
 
-	for(i = 0; i < string->len; i++)
+	for(i = 0; i < string->len; i++) {
 		n += writechar(string->val[i], str + n);
+	}
 
 	str[n] = '\"';
 	n++;
