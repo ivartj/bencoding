@@ -10,6 +10,7 @@ static size_t writestring(bencode_val *val, io_writer *w, unsigned ind);
 static size_t writeinteger(bencode_val *val, io_writer *w, unsigned ind);
 static size_t writelist(bencode_val *val, io_writer *w, unsigned ind);
 static size_t writedict(bencode_val *val, io_writer *w, unsigned ind);
+static size_t indent(io_writer *w, unsigned ind);
 
 char *bencode_val_json(bencode_val *val, size_t *rlen)
 {
