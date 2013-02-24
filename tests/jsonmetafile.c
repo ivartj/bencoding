@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 	char *json;
 	size_t jsonlen;
 
-	file = fopen("minix.torrent", "r");
+	file = fopen("minix.torrent", "rb");
 	if(file == NULL) {
 		fprintf(stderr, "Failed to open minix.torrent.\n");
 		exit(EXIT_FAILURE);

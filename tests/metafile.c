@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 	bencode_dict *info;
 	bencode_integer *private;
 
-	file = fopen("minix.torrent", "r");
+	file = fopen("minix.torrent", "rb");
 	if(file == NULL) {
 		fprintf(stderr, "Failed to open minix.torrent.\n");
 		exit(EXIT_FAILURE);

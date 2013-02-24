@@ -72,7 +72,7 @@ size_t writechar(unsigned char c, char *str)
 		return sprintf(str, "\\\\");
 	}
 
-	if(isspace(c) || (isgraph(c) && isascii(c))) {
+	if(isascii(c) && (isspace(c) || isgraph(c))) {
 		str[0] = c;
 		return 1;
 	}
