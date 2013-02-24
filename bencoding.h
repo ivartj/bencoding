@@ -3,8 +3,8 @@
 
 #include <stdio.h>
 
-#define BENCODE_INTEGER 1
-#define BENCODE_STRING 2
+#define BENCODE_STRING 1
+#define BENCODE_INTEGER 2
 #define BENCODE_LIST 3
 #define BENCODE_DICT 4
 
