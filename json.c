@@ -72,6 +72,10 @@ size_t writechar(unsigned char c, char *str)
 		return sprintf(str, "\\\\");
 	}
 
+	if(c == '\"') {
+		return sprintf(str, "\\\"");
+	}
+
 	if(isascii(c) && (isspace(c) || isgraph(c))) {
 		str[0] = c;
 		return 1;
