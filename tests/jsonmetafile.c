@@ -58,5 +58,7 @@ int main(int argc, char *argv[])
 	puts(json);
 	free(json);
 
+	printf("%d\n", jsonlen);
+
 	exit(EXIT_SUCCESS);
 }

@@ -5,8 +5,8 @@
 
 #define BENCODE_INTEGER 1
 #define BENCODE_STRING 2
-#define BENCODE_LIST 4
-#define BENCODE_DICT 8
+#define BENCODE_LIST 3
+#define BENCODE_DICT 4
 
 typedef struct bencode_string bencode_string;
 typedef struct bencode_integer bencode_integer;
