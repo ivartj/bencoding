@@ -76,8 +76,10 @@ size_t writechar(unsigned char c, io_writer *w)
 	if(c == '\"')
 		return io_printf(w, "\\\"");
 
+	if(c == '\n')
+		return io_printf(w, "\\n");
 
-	if(isspace(c) || (isgraph(c) && isascii(c)))
+	if((c == ' ' || c == '\t') || (isgraph(c) && isascii(c)))
 		return io_putc(w, c);
 
 	n = io_printf(w, "\\x%.2hhX", c);
