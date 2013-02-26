@@ -6,6 +6,8 @@ AM_PROG_CC_C_O
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 AM_PROG_LIBTOOL
 
+PKG_CHECK_MODULES([IO], [ivartjio])
+
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_FILES([
 	Makefile

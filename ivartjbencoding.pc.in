@@ -6,5 +6,5 @@ includedir=@includedir@
 Name: ivartjbencoding
 Description: bencoding parser and writer library.
 Version: @VERSION@
-Libs: -L${libdir} -livartjbencoding
+Libs: -L${libdir} -livartjbencoding @IO_LIBS@
 Cflags: -I${includedir}
