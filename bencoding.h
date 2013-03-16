@@ -2,6 +2,7 @@
 #define BENCODING_H
 
 #include <stdio.h>
+#include <ivartj/io.h>
 
 #define BENCODE_STRING 1
 #define BENCODE_INTEGER 2
@@ -49,6 +50,7 @@ union bencode_val {
 };
 
 bencode_val *bencode_parse(const char *input, size_t len);
+bencode_val *bencode_parse_reader(io_reader *r);
 char *bencode_val_string(bencode_val *val, size_t *rlen);
 char *bencode_val_json(bencode_val *val, size_t *rlen);
 

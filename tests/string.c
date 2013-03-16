@@ -8,8 +8,17 @@ int main(int argc, char *argv[])
 	char *str = "5:camel";
 	int n;
 	bencode_string *val;
+	io_buf buf;
+	io_reader r;
 
-	val = parsestring(str, strlen(str), &n);
+	memset(&buf, 0, sizeof(buf));
+	memset(&r, 0, sizeof(r));
+	buf.buf = str;
+	buf.len = strlen(str);
+	r.data = &buf;
+	r.read = io_bufread;
+
+	val = parsestring(&r, &n);
 
 	assert(val != NULL);
 
