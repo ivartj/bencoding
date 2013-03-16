@@ -1,6 +1,12 @@
 ACLOCAL_AMFLAGS = -I m4
 SUBDIRS = tests
 
+bin_PROGRAMS = ben2js
+
+ben2js_SOURCES = ben2js.c bencoding.c json.c bencoding.h
+ben2js_CFLAGS = $(IO_CFLAGS)
+ben2js_LDADD = $(IO_LIBS)
+
 ivartjincludedir = $(includedir)/ivartj
 ivartjinclude_HEADERS = bencoding.h
 
