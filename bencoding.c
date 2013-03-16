@@ -3,68 +3,104 @@
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
+#include <ivartj/io.h>
 
-static bencode_string *parsestring(const char *input, size_t len, size_t *rlen);
-static bencode_integer *parseinteger(const char *input, size_t len, size_t *rlen);
-static bencode_list *parselist(const char *input, size_t len, size_t *rlen);
-static bencode_dict *parsedict(const char *input, size_t len, size_t *rlen);
-static bencode_val *parseval(const char *input, size_t len, size_t *rlen);
+static bencode_string *parsestring(io_reader *r, size_t *rlen);
+static bencode_integer *parseinteger(io_reader *r, size_t *rlen);
+static bencode_list *parselist(io_reader *r, size_t *rlen);
+static bencode_dict *parsedict(io_reader *r, size_t *rlen);
+static bencode_val *parseval(io_reader *r, size_t *rlen);
 static size_t writeval(bencode_val *val, char *str);
 static size_t valstrlen(bencode_val *val);
 
 bencode_val *bencode_parse(const char *input, size_t len)
 {
-	size_t rlen;
-	return parseval(input, len, &rlen);
+	io_buf buf;
+	io_reader r;
+
+	memset(&buf, 0, sizeof(buf));
+	memset(&r, 0, sizeof(r));
+
+	buf.buf = input;
+	buf.len = len;
+	r.read = io_bufread;
+	r.data = &buf;
+
+	return bencode_parse_reader(&r);
 }
 
-bencode_val *parseval(const char *input, size_t len, size_t *rlen)
+bencode_val *bencode_parse_reader(io_reader *r)
 {
-	if(len < 2)
-		return 0;
-	switch(input[0]) {
-	case 'i':
-		return (bencode_val *)parseinteger(input, len, rlen);
-	case 'l':
-		return (bencode_val *)parselist(input, len, rlen);
-	case 'd':
-		return (bencode_val *)parsedict(input, len, rlen);
-	default:
-		return (bencode_val *)parsestring(input, len, rlen);
-	}
+	size_t rlen;
+	return parseval(r, &rlen);
 }
 
-bencode_integer *parseinteger(const char *input, size_t len, size_t *rlen)
+bencode_val *parseval(io_reader *r, size_t *rlen)
+{
+	int c;
+
+	c = io_getc(r);
+	if(c == EOF)
+		return NULL;
+
+	switch(c) {
+	case 'i':
+		return (bencode_val *)parseinteger(r, rlen);
+	case 'l':
+		return (bencode_val *)parselist(r, rlen);
+	case 'd':
+		return (bencode_val *)parsedict(r, rlen);
+	default:
+		return (bencode_val *)parsestring(r, rlen);
+	}
+
+	return NULL;
+}
+
+bencode_integer *parseinteger(io_reader *r, size_t *rlen)
 {
 	int n;
 	int negative;
 	int val;
 	bencode_integer *out;
+	int c;
 
 	n = 0;
 	val = 0;
-	if(len < 2)
+
+	c = io_getc(r);
+	if(c != 'i') {
+		puts("1");
 		return 0;
-	if(input[0] != 'i')
-		return 0;
+	}
 	n++;
 
 	negative = 0;
-	if(input[n] == '-') {
+	c = io_getc(r);
+	if(c == EOF)
+		return 0;
+	if(c == '-') {
 		negative = 1;
 		n++;
+		c = io_getc(r);
 	}
 
-	while(n < len) {
-		if(input[n] >= '0' && input[n] <= '9') {
+	do {
+		if(c >= '0' && c <= '9') {
 			val *= 10;
-			val += input[n] - '0';
+			val += c - '0';
 			n++;
 			continue;
-		} else if(input[n] == 'e') {
+		} else if(c == 'e') {
 			n++;
 			break;
 		}
+		puts("2");
+		return 0;
+	} while((c = io_getc(r)) != EOF);
+
+	if(c == EOF) {
+		puts("3");
 		return 0;
 	}
 
@@ -78,35 +114,43 @@ bencode_integer *parseinteger(const char *input, size_t len, size_t *rlen)
 	return out;
 }
 
-bencode_string *parsestring(const char *input, size_t len, size_t *rlen)
+bencode_string *parsestring(io_reader *r, size_t *rlen)
 {
 	char *val;
-	int slen;
+	size_t slen;
+	size_t scribed;
 	int n;
 	bencode_string *out;
+	int c;
 
 	slen = 0;
 	n = 0;
 
-	while(n < len) {
-		if(input[n] >= '0' && input[n] <= '9') {
+	while((c = io_getc(r)) != EOF) {
+		if(c >= '0' && c <= '9') {
 			slen *= 10;
-			slen += input[n] - '0';
+			slen += c - '0';
 			n++;
 			continue;
-		} else if(input[n] == ':') {
+		} else if(c == ':') {
 			n++;
 			break;
 		}
 		return 0;
 	}
 
-	if(slen > len - n)
+	if(c == EOF) {
 		return 0;
+	}
 
 	val = malloc(slen + 1);
 	val[slen] = '\0';
-	memcpy(val, input + n, slen);
+	scribed = r->read(val, 1, slen, r->data);
+	if(scribed != slen) {
+		free(val);
+		puts("4");
+		return 0;
+	}
 	n += slen;
 
 	out = calloc(1, sizeof(bencode_string));
@@ -118,30 +162,28 @@ bencode_string *parsestring(const char *input, size_t len, size_t *rlen)
 	return out;
 }
 
-bencode_list *parselist(const char *input, size_t len, size_t *rlen)
+bencode_list *parselist(io_reader *r, size_t *rlen)
 {
 	size_t n;
 	size_t eln;
 	bencode_val *el;
 	bencode_list *out;
+	int c;
 
 	n = 0;
 
-	if(len < 2)
-		return 0;
-
-	if(input[0] != 'l')
+	if(io_getc(r) != 'l')
 		return 0;
 	n++;
 
 	out = calloc(1, sizeof(bencode_list));
 
-	while(n < len) {
-		if(input[n] == 'e') {
+	while((c = io_getc(r)) != EOF) {
+		if(c == 'e') {
 			n++;
 			goto ret;
 		}
-		el = parseval(input + n, len - n, &eln);
+		el = parseval(r, &eln);
 		if(el == 0)
 			goto err;
 		bencode_list_add(out, el);
@@ -192,35 +234,33 @@ void bencode_list_add(bencode_list *list, bencode_val *val)
 	list->vals[list->nvals - 1] = val;
 }
 
-bencode_dict *parsedict(const char *input, size_t len, size_t *rlen)
+bencode_dict *parsedict(io_reader *r, size_t *rlen)
 {
 	size_t n;
 	size_t eln;
 	bencode_string *key;
 	bencode_val *el;
 	bencode_dict *out;
+	int c;
 
 	n = 0;
 
-	if(len < 2)
-		return 0;
-
-	if(input[0] != 'd')
+	if(io_getc(r) != 'd')
 		return 0;
 	n++;
 
 	out = calloc(1, sizeof(bencode_dict));
 
-	while(n < len) {
-		if(input[n] == 'e') {
+	while((c = io_getc(r)) != EOF) {
+		if(c == 'e') {
 			n++;
 			goto ret;
 		}
-		key = parsestring(input + n, len - n, &eln);
+		key = parsestring(r, &eln);
 		if(key == 0)
 			goto err;
 		n += eln;
-		el = parseval(input + n, len - n, &eln);
+		el = parseval(r, &eln);
 		if(el == 0) {
 			bencode_free_recursive((bencode_val *)key);
 			goto err;

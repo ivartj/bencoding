@@ -8,10 +8,16 @@ int main(int argc, char *argv[])
 	char *str;
 	int n;
 	bencode_integer *val;
+	io_buf buf;
+	io_reader r;
 
 	str = "i500e";
+	buf.buf = str;
+	buf.len = strlen(str);
+	r.data = &buf;
+	r.read = io_bufread;
 
-	val = parseinteger(str, strlen(str), &n);
+	val = parseinteger(&r, &n);
 	assert(val != NULL);
 
 	assert(val->val == 500);

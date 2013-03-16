@@ -9,11 +9,20 @@ int main(int argc, char *argv[])
 	bencode_string *key;
 	bencode_integer *val;
 	int i;
+	io_buf buf;
+	io_reader r;
 
 	char *str = "d5:cameli5e6:camelsi6ee";
 	int n;
 
-	dict = parsedict(str, strlen(str), &n);
+	memset(&buf, 0, sizeof(buf));
+	memset(&r, 0, sizeof(r));
+	buf.buf = str;
+	buf.len = strlen(str);
+	r.data = &buf;
+	r.read = io_bufread;
+
+	dict = parsedict(&r, &n);
 	assert(dict != NULL);
 
 	assert(dict->nvals == 2);
