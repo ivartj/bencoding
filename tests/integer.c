@@ -11,18 +11,18 @@ int main(int argc, char *argv[])
 	io_buf buf;
 	io_reader r;
 
-	str = "i500e";
+	str = "500e";
 	buf.buf = str;
 	buf.len = strlen(str);
 	r.data = &buf;
 	r.read = io_bufread;
 
-	val = parseinteger(&r, &n);
+	val = parseinteger('i', &r, &n);
 	assert(val != NULL);
 
 	assert(val->val == 500);
 
-	assert(n == strlen(str));
+	assert(n == strlen(str) + 1);
 
 	exit(EXIT_SUCCESS);
 }

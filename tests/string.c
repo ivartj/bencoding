@@ -5,7 +5,7 @@
 
 int main(int argc, char *argv[])
 {
-	char *str = "5:camel";
+	char *str = ":camel";
 	int n;
 	bencode_string *val;
 	io_buf buf;
@@ -18,13 +18,13 @@ int main(int argc, char *argv[])
 	r.data = &buf;
 	r.read = io_bufread;
 
-	val = parsestring(&r, &n);
+	val = parsestring('5', &r, &n);
 
 	assert(val != NULL);
 
 	assert(strcmp(val->val, "camel") == 0);
 
-	assert(n == strlen(str));
+	assert(n == strlen(str) + 1);
 
 	exit(EXIT_SUCCESS);
 }
