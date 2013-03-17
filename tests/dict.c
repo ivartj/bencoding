@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 	io_buf buf;
 	io_reader r;
 
-	char *str = "d5:cameli5e6:camelsi6ee";
+	char *str = "5:cameli5e6:camelsi6ee";
 	int n;
 
 	memset(&buf, 0, sizeof(buf));
@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
 	r.data = &buf;
 	r.read = io_bufread;
 
-	dict = parsedict(&r, &n);
+	dict = parsedict('d', &r, &n);
 	assert(dict != NULL);
 
 	assert(dict->nvals == 2);

@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
 	bencode_list *list;
 	bencode_integer *integer;
 	bencode_string *string;
-	char *str = "l5:cameli5ee";
+	char *str = "5:cameli5ee";
 	int n;
 	int i;
 	io_buf buf;
@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
 	r.data = &buf;
 	r.read = io_bufread;
 
-	list = parselist(&r, &n);
+	list = parselist('l', &r, &n);
 	assert(list != NULL);
 	assert(list->nvals == 2);
 
@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
 	assert(list->vals[1] != NULL);
 	assert(list->vals[1]->type == BENCODE_INTEGER);
 
-	assert(n == strlen(str));
+	assert(n == strlen(str) + 1);
 
 	exit(EXIT_SUCCESS);
 }
